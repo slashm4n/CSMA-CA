@@ -1,0 +1,463 @@
+import tkinter as tk
+from numpy import random as rn
+import csv
+
+# Simulation parameters
+TIME_SLOTS = 100000
+PACKET_PROBABILITY = 0.01
+PACKET_LENGTH = 4
+NUM_NODES = 50
+TIME_STEP_MS = 200
+
+# Protocol constants
+DIFS_DURATION = 3
+SIFS_DURATION = 1
+RTS_CTS_ACK_OVERHEAD = 5 # SIFS + CTS + SIFS + ACK
+
+# Node activity states
+STATE_IDLE = 0
+STATE_SENDING_DATA = 1
+STATE_WAITING_NAV = 2
+STATE_WAITING_DIFS = 3
+STATE_SENDING_RTS = 4
+STATE_BACKOFF = 5
+
+# Receiver states
+RECEIVER_IDLE = 0
+RECEIVER_SENDING_CTS = 1
+RECEIVER_SENDING_ACK = 2
+RECEIVER_COLLISION = 3
+
+PACKETS_SENT = [0] * NUM_NODES
+TOT_PACKETS = [0] * NUM_NODES
+COLLISIONS = [0] * NUM_NODES
+
+rn.seed(1)
+
+list_packets_sent = []
+list_tot_packets = []
+list_collisions = []
+
+class RTSPacket:
+    def __init__(self, sender_id, data_length):
+        self.sender_id = sender_id
+        self.total_duration = data_length + RTS_CTS_ACK_OVERHEAD
+
+
+class CTSPacket:
+    def __init__(self, destination_id):
+        self.destination_id = destination_id
+
+
+class DataPacket:
+    def __init__(self, sender_id, is_last=False):
+        self.sender_id = sender_id
+        self.is_last = is_last
+
+
+class ACKPacket:
+    def __init__(self, destination_id):
+        self.destination_id = destination_id
+
+
+class TransmitterNode:
+    def __init__(self, node_id, packet_prob, packet_length):
+        self.node_id = node_id
+        self.packet_prob = packet_prob
+        self.packet_length = packet_length
+        
+        # State variables
+        self.data_queue = 0  # Number of packets waiting to send
+        self.nav_timer = 0  # Network Allocation Vector
+        self.difs_timer = 0  # DCF Interframe Space timer
+        self.backoff_timer = 0  # Exponential backoff timer
+        self.data_remaining = 0  # Data slots remaining to transmit
+        
+        # Status flags
+        self.waiting_for_cts = False
+        self.has_cts = False
+        self.ready_to_send = False
+        
+        # Contention window for exponential backoff
+        self.cw_min = 3
+        self.cw_max = 5
+        
+    def generate_new_data(self):
+        if rn.random() < self.packet_prob:
+            self.data_queue += 1
+            TOT_PACKETS[int(self.node_id)-1] += 1
+
+    def reset_contention_window(self):
+        self.cw_max = 5
+        self.cw_min = 3
+    
+    def increase_contention_window(self):
+        self.cw_max += 2
+    
+    def set_random_backoff(self):
+        self.backoff_timer = rn.randint(self.cw_min, self.cw_max + 1)
+    
+    def process_timestep(self, channel, t, activity_log):
+        self.generate_new_data()
+        current_channel = channel[t]
+        prev_channel = channel[t-1] if t > 0 else None
+        
+        # If NAV is initialized, I must wait
+        if self.nav_timer > 0:
+            self.nav_timer -= 1
+            self.waiting_for_cts = False
+            activity_log[t] = STATE_WAITING_NAV
+            return
+        
+        # If I'm ready to send data (I received a CTS)
+        if self.ready_to_send:
+            self.ready_to_send = False
+            return
+        
+        # If I detected a collision in previous slot
+        if isinstance(prev_channel, RTSPacket) and prev_channel.sender_id == "COLLISION":
+            self._handle_collision(t, activity_log)
+            return
+        
+        # If I received RTS from another node, set NAV
+        if isinstance(prev_channel, RTSPacket) and prev_channel.sender_id != self.node_id:
+            self._handle_others_rts(prev_channel, t, activity_log)
+            return
+        
+        # If I have received a CTS
+        if isinstance(current_channel, CTSPacket) and current_channel.destination_id == self.node_id:
+            self._handle_cts_received(activity_log, t)
+            return
+        
+        # Sending data
+        if self.has_cts and self.data_remaining > 0:
+            self._send_data(channel, t, activity_log)
+            return
+        
+        # Finished sending data
+        if self.has_cts and self.data_remaining == 0:
+            self._finish_transmission()
+            return
+        
+        # Waiting for CTS response
+        if self.waiting_for_cts:
+            self.waiting_for_cts = False
+            return
+        
+        # DIFS countdown
+        if self.difs_timer > 0:
+            self._handle_difs(channel, t, activity_log)
+            return
+        
+        # Backoff countdown
+        if self.backoff_timer > 1:
+            self.backoff_timer -= 1
+            activity_log[t] = STATE_BACKOFF
+            return
+        
+        # Backoff completed; try to send RTS
+        if self.backoff_timer == 1:
+            self.backoff_timer = 0
+            activity_log[t] = STATE_BACKOFF
+            if self.data_queue > 0:
+                self._try_send_rts_after_backoff(channel, t, activity_log)
+            return
+        
+        # If the channel is idle and I have data to send, start DIFS
+        if current_channel is None and self.data_queue > 0 and self.difs_timer == 0:
+            self.difs_timer = DIFS_DURATION
+            activity_log[t] = STATE_WAITING_DIFS
+            # Reset contention window on successful ACK
+            if isinstance(prev_channel, ACKPacket):
+                self.reset_contention_window()
+    
+    def _handle_collision(self, t, activity_log):
+        self.difs_timer = 0
+        self.waiting_for_cts = False
+        COLLISIONS[int(self.node_id)-1] += 1
+        # Increase contention window if was in backoff
+        if t >= 2 and activity_log[t-2] == STATE_BACKOFF:
+            self.increase_contention_window()
+        self.set_random_backoff()
+        # Start backoff immediately (decrement since we're already in this timestep)
+        if self.backoff_timer > 0:
+            activity_log[t] = STATE_BACKOFF
+            self.backoff_timer -= 1
+        else:
+            activity_log[t] = STATE_IDLE
+    
+    def _handle_others_rts(self, rts_packet, t, activity_log):
+        self.nav_timer = rts_packet.total_duration
+        self.difs_timer = 0
+        self.backoff_timer = 0
+        activity_log[t] = STATE_WAITING_NAV
+        self.nav_timer -= 1
+    
+    def _handle_cts_received(self, activity_log, t):
+        self.has_cts = True
+        self.ready_to_send = True
+        self.data_remaining = self.packet_length
+    
+    def _send_data(self, channel, t, activity_log):
+        self.data_remaining -= 1
+        is_last = (self.data_remaining == 0)
+        channel[t] = DataPacket(self.node_id, is_last)
+        activity_log[t] = STATE_SENDING_DATA
+    
+    def _finish_transmission(self):
+        self.has_cts = False
+        self.data_queue -= 1
+        PACKETS_SENT[int(self.node_id)-1] += 1
+    
+    def _handle_difs(self, channel, t, activity_log):
+        self.difs_timer -= 1
+        activity_log[t] = STATE_WAITING_DIFS
+        
+        if self.difs_timer == 0:
+            # DIFS complete, try to send RTS
+            if channel[t] is None:
+                # Channel free, send RTS
+                channel[t] = RTSPacket(self.node_id, self.packet_length)
+                self.waiting_for_cts = True
+                activity_log[t] = STATE_SENDING_RTS
+            elif isinstance(channel[t], RTSPacket):
+                # Collision detected
+                channel[t] = RTSPacket("COLLISION", self.packet_length)
+                self.waiting_for_cts = True
+                activity_log[t] = STATE_SENDING_RTS
+            else:
+                # Channel busy with other traffic, stay idle
+                activity_log[t] = STATE_IDLE
+    
+    def _try_send_rts_after_backoff(self, channel, t, activity_log):
+        
+        if channel[t] is None:
+            # Channel free, send RTS
+            channel[t] = RTSPacket(self.node_id, self.packet_length)
+            self.waiting_for_cts = True
+            activity_log[t] = STATE_SENDING_RTS
+        elif isinstance(channel[t], RTSPacket):
+            # Collision detected
+            channel[t] = RTSPacket("COLLISION", self.packet_length)
+            self.waiting_for_cts = True
+            activity_log[t] = STATE_SENDING_RTS
+        else:
+            # Channel busy with other traffic, stay idle
+            activity_log[t] = STATE_IDLE
+
+
+class ReceiverNode:
+    def __init__(self):
+        self.destination_id = None
+        self.expected_duration = 0
+        self.should_send_cts = False
+        self.should_send_ack = False
+    
+    def process_timestep(self, channel, time_idx, receiver_log):
+        current_channel = channel[time_idx]
+        
+        # Handle RTS reception
+        if isinstance(current_channel, RTSPacket):
+            self.destination_id = current_channel.sender_id
+            self.expected_duration = current_channel.total_duration
+            
+            if self.destination_id == "COLLISION":
+                self.should_send_cts = False
+                receiver_log[time_idx] = RECEIVER_COLLISION
+            else:
+                self.should_send_cts = True
+        
+        # Send CTS after SIFS
+        elif self.should_send_cts:
+            if time_idx + 1 < len(channel):
+                channel[time_idx + 1] = CTSPacket(self.destination_id)
+                receiver_log[time_idx + 1] = RECEIVER_SENDING_CTS
+            self.should_send_cts = False
+        
+        # Handle data reception
+        elif isinstance(current_channel, DataPacket):
+            self.destination_id = current_channel.sender_id
+            if current_channel.is_last:
+                self.should_send_ack = True
+        
+        # Send ACK after SIFS
+        elif self.should_send_ack:
+            if time_idx + 1 < len(channel):
+                channel[time_idx + 1] = ACKPacket(self.destination_id)
+                receiver_log[time_idx + 1] = RECEIVER_SENDING_ACK
+            self.should_send_ack = False
+
+
+def run_simulation(num_slots, num_nodes, packet_prob, packet_length):
+    channel = [None] * num_slots
+    receiver_log = [RECEIVER_IDLE] * num_slots
+    node_logs = [[STATE_IDLE] * num_slots for _ in range(num_nodes)]
+    
+    # Create nodes
+    nodes = [
+        TransmitterNode(str(i + 1), packet_prob, packet_length)
+        for i in range(num_nodes)
+    ]
+    receiver = ReceiverNode()
+    backoffs = [[0 for i in range (num_nodes)] for j in range(num_slots)]
+    # Run simulation
+    for t in range(num_slots):
+        for idx, node in enumerate(nodes):
+            node.process_timestep(channel, t, node_logs[idx])
+            backoffs[t][int(node.node_id)-1] = node.backoff_timer
+        receiver.process_timestep(channel, t, receiver_log)
+        if t % 1000 == 0 and t > 0:
+            list_packets_sent.append(PACKETS_SENT.copy())
+            list_tot_packets.append(TOT_PACKETS.copy())
+            list_collisions.append(COLLISIONS.copy())
+    csv.writer(open("data/backoffs_classic_n_" + str(num_nodes) + "_p_" + str(packet_prob) + ".csv", "w", newline="")).writerows(backoffs)
+    return channel, node_logs, receiver_log
+
+
+class CSMAGui:
+    def __init__(self, root, channel, node_activities, receiver, step_ms=200):
+        self.root = root
+        self.channel = channel
+        self.node_activities = node_activities
+        self.receiver = receiver
+        self.time_slots = len(channel)
+        self.num_nodes = len(node_activities)
+        self.step_ms = step_ms
+
+        self.cell_width = 15
+        self.row_height = 22
+        self.left_margin = 70
+
+        self.colors = {0: "white", 1: "light grey", 2: "red", 3: "green", 4: "light blue", 
+                      5: "light green", 6: "dark olive green", 7: "yellow", 8: "dark turquoise", 
+                      9: "grey", 10: "dark red"}
+
+        rows = 2 + self.num_nodes
+        width = self.left_margin + self.cell_width * self.time_slots
+        height = self.row_height * (rows + 1 + len(self.colors)) + 10
+
+        self.canvas = tk.Canvas(root, width=width, height=height, bg="white")
+        self.canvas.pack()
+
+        self.channel_rects = [None] * self.time_slots
+        self.node_rects = [[None] * self.time_slots for _ in range(self.num_nodes)]
+        self.receiver_rects = [None] * self.time_slots
+
+        self.current_t = 0
+
+        self.draw_static_grid()
+        self.create_rectangles()
+        self.draw_legend()
+
+        btn_frame = tk.Frame(root)
+        btn_frame.pack(pady=5)
+        tk.Button(btn_frame, text="Start animation", command=self.start_animation).pack()
+
+    def draw_static_grid(self):
+        for row in range(0, 2 + self.num_nodes):
+            y0 = row * self.row_height
+            y1 = y0 + self.row_height
+
+            if row == 0: label = "Channel"
+            elif row == 1 + self.num_nodes: label = "Receiver"
+            else: label = "Node " + str(row)
+
+            self.canvas.create_text(self.left_margin - 5, (y0 + y1) / 2, text=label, anchor="e")
+
+            for t in range(0, self.time_slots, 5):
+                x = self.left_margin + t * self.cell_width
+                self.canvas.create_line(x, 0, x, self.row_height * (2 + self.num_nodes), dash=(2, 4))
+                self.canvas.create_text(x + 2, self.row_height * (2 + self.num_nodes),
+                                      text=str(t), anchor="n", font=("Arial", 7))
+
+    def create_rectangles(self):
+        for t in range(self.time_slots):
+            y0 = 0 * self.row_height
+            y1 = y0 + self.row_height
+            x0 = self.left_margin + t * self.cell_width
+            x1 = x0 + self.cell_width
+
+            rect_id = self.canvas.create_rectangle(x0, y0, x1, y1, fill="light grey", outline="black")
+            self.channel_rects[t] = rect_id
+
+            for row in range(self.num_nodes):
+                y0 = (row + 1) * self.row_height
+                y1 = y0 + self.row_height
+                rect_id = self.canvas.create_rectangle(x0, y0, x1, y1, fill="white", outline="black")
+                self.node_rects[row][t] = rect_id
+
+            y0 = (1 + self.num_nodes) * self.row_height
+            y1 = y0 + self.row_height
+            rect_id = self.canvas.create_rectangle(x0, y0, x1, y1, fill="white", outline="black")
+            self.receiver_rects[t] = rect_id
+
+    def draw_legend(self):
+        c = 0
+        for row in range(3 + self.num_nodes, len(self.colors) + 3 + self.num_nodes):
+            y0 = row * self.row_height
+            y1 = y0 + self.row_height
+            x0 = self.left_margin
+            x1 = x0 + self.cell_width
+
+            self.canvas.create_rectangle(x0, y0, x1, y1, fill=self.colors[c], outline="black")
+            
+            labels = ["The node is waiting", "The channel is idle", "The channel is being used",
+                     "Data packet", "Waiting for DIFS", "RTS packet", "CTS packet", "NAV",
+                     "ACK", "Exponential backoff", "Collision"]
+            
+            self.canvas.create_text(x1 + len(self.colors), (y0 + y1) / 2, 
+                                  text=labels[c], anchor="w")
+            c += 1
+
+    def start_animation(self):
+        for t in range(self.time_slots):
+            self.canvas.itemconfig(self.channel_rects[t], fill="light grey")
+            for row in range(self.num_nodes):
+                self.canvas.itemconfig(self.node_rects[row][t], fill="white")
+            self.canvas.itemconfig(self.receiver_rects[t], fill="white")
+        self.current_t = 0
+        self.animate_step()
+
+    def animate_step(self):
+        if self.current_t >= self.time_slots:
+            return
+
+        t = self.current_t
+
+        channel_busy = self.channel[t]
+        chan_color = "red" if channel_busy else "light grey"
+        self.canvas.itemconfig(self.channel_rects[t], fill=chan_color)
+        
+        node_colors = {0: "white", 1: "green", 2: "yellow", 3: "light blue", 
+                      4: "light green", 5: "grey"}
+        for row in range(self.num_nodes):
+            status = self.node_activities[row][t]
+            color = node_colors[status]
+            self.canvas.itemconfig(self.node_rects[row][t], fill=color)
+
+        receiver_colors = {0: "white", 1: "dark olive green", 2: "dark turquoise", 3: "dark red"}
+        status = self.receiver[t]
+        color = receiver_colors[status]
+        self.canvas.itemconfig(self.receiver_rects[t], fill=color)
+        
+        self.current_t += 1
+        self.root.after(self.step_ms, self.animate_step)
+
+
+if __name__ == "__main__":
+    channel, node_activities, receiver = run_simulation(
+        num_slots=TIME_SLOTS,
+        num_nodes=NUM_NODES,
+        packet_prob=PACKET_PROBABILITY,
+        packet_length=PACKET_LENGTH
+    )
+    
+    csv.writer(open("data/packets_sent_classic.csv", "w", newline="")).writerows(list_packets_sent)
+    csv.writer(open("data/collisions_classic.csv", "w", newline="")).writerows(list_collisions)
+    csv.writer(open("data/tot_packets_classic.csv", "w", newline="")).writerows(list_tot_packets)
+
+    if False:
+        root = tk.Tk()
+        root.title("MAC Protocol Visualization (Animated)")
+        app = CSMAGui(root, channel, node_activities, receiver, step_ms=TIME_STEP_MS)
+        root.mainloop()

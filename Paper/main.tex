@@ -1,0 +1,376 @@
+\documentclass[11pt,journal]{IEEEtran}
+\usepackage{lipsum}
+\usepackage[T1]{fontenc}
+\usepackage{fouriernc}
+\usepackage{cases}
+\usepackage{amsmath}
+\usepackage[noadjust]{cite}
+\usepackage{hyperref}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{makecell}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{tikz}
+\usepackage{placeins}
+
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    anchorcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+\graphicspath{ {./imgs/} }
+\newcommand{\eq}{\; = \;}
+\newcommand{\nl}{
+
+\medskip
+
+}
+
+\title{SIMULATING CSMA/CA WITH RL}
+\author{Davide Avolio}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+The goal of this project is to create a simulation for the CSMA/CA protocol. Two versions were created: a standard one and an adaptive one with a Reinforcement Learning approach. The two methods were compared according to some metrics such as the throughput and the packet delivery ratio.
+\end{abstract}
+
+\section{Simulation}
+In this project, I present a simulation of the CSMA/CA protocol both in the classical and in the adaptive version with Reinforcement Learning. Everything was developed in Python.
+\nl
+The parameters of the simulation are:
+\begin{itemize}
+	\item Number of nodes
+	\item Packet length
+	\item Packet generation probability
+	\item Number of timesteps of the simulation
+\end{itemize}
+\subsection{Classic CSMA/CA}
+The first step was to create a simulation of the classic CSMA/CA protocol.
+\nl
+I created a class for the transmitter node, a class for the receiver node and a class for each kind of packet (data, RTS, CTS and ACK).
+\nl
+The first thing the transmitter node does is to generate a packet according to the probability specified above. Then it checks the NAV, the backoff and finally the channel. There are in total 12 checks it performs at each timestep.
+\nl
+The receiver node is always listening to the channel and it just sends the CTS, ACK or nothing in case there are no RTS or in case there's a collision between RTS.
+\nl
+The RTS packet contains the sender id and the amount of time the other nodes should wait in NAV. The CTS packet has just the destination id. The data packet has the sender id and a flag that is marked only when the data is finished (to notify the receiver). The ACK packet has instead only the destination id.
+\subsection{Adaptive CSMA/CA}
+In the Adaptive CSMA/CA another class was added: the RL agent. There is one agent per node. The algorithm I implemented is the Q-learning one.
+\nl
+In Q-learning, every time we compute a new action, we store the reward and then we evaluate the TD error, the difference between the discounted best next Q-state and the current one.
+\nl
+$Q(s,a) \leftarrow Q(s,a) + \alpha \left[ r + \gamma \max_{a'} Q(s', a') - Q(s,a) \right]$
+\nl
+The agent is called only in two situations: when there's a collision (negative reward) and when there's a successful transmission (positive reward). The agent replaces the exponential backoff, so the possible actions are the amount of time the node should wait. The state is instead given by the number of collisions since the last successful transmission.
+\nl
+Since each node is independent, they all have a separate Q-table. The states are 16 are they are based on possible ranges of recent collisions:
+\begin{itemize}
+	\item 0 recent collisions.
+	\item 1 recent collision.
+	\item 2 recent collisions.
+	\item 3 or more recent collisions.
+\end{itemize}
+And on ranges of packets in queue:
+\begin{itemize}
+	\item 0 to 3 packets in queue.
+	\item 4 to 7 packets in queue.
+	\item 8 to 15 packets in queue.
+	\item 16 or more packets in queue.
+\end{itemize}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{QTable}
+	\centering
+	\includegraphics[width=\linewidth]{QTable}
+	\caption{QTable of a node}
+\end{figure}
+\FloatBarrier
+\subsection{Visualization}
+All the actions of the nodes and the status of the channel are saved in separate lists, that have as many items as timesteps. To visualize these data, I used the Tkinter library. Each timestep is visualized as a cell and the color is given by the type of action performed.
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{simulation_viewer}
+	\centering
+	\includegraphics[width=\linewidth]{simulation_viewer}
+	\caption{An example of simulation with the classic CSMA/CA, 5 nodes and packet probability = 0.03}
+\end{figure}
+\FloatBarrier
+\section{Performance}
+In this section we are going to analyze how the performance of a single protocol varies by changing the parameters. Three metrics were considered:
+\begin{LaTeXdescription}
+	\item[$\bullet$ Packets sent] The total number of packets that have been successfully sent. Since the packets have a fixed length and we're comparing simulations with the same random seed and with the same time length, this is equivalent to the throughput (only the values change, but the graph is the same).
+	\item[$\bullet$ Packet delivery ratio] The number of packets that have arrived successfully over the total number of packets generated.
+	\item[$\bullet$ Collisions] The number of collisions that occurred in the simulation.
+\end{LaTeXdescription}
+In the following statistics, we are taking into account the average of these metrics per node.
+\subsection{Classic CSMA/CA}
+In the Classic CSMA/CA protocol there're two parameters that we can change: the number of nodes and the packet generation probability.
+\nl
+We start with the number of nodes:
+\nl
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Classic_3_nodes_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{Classic_3_nodes_0.01}
+	\caption{Classic CSMA/CA with 3 nodes and packet probability = 0.01}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Classic_5_nodes_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{Classic_5_nodes_0.01}
+	\caption{Classic CSMA/CA with 5 nodes and packet probability = 0.01}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Classic_10_nodes_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{Classic_10_nodes_0.01}
+	\caption{Classic CSMA/CA with 10 nodes and packet probability = 0.01}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Classic_25_nodes_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{Classic_25_nodes_0.01}
+	\caption{Classic CSMA/CA with 25 nodes and packet probability = 0.01}
+\end{figure}
+\FloatBarrier
+We can see that the higher the number of nodes and the lower is the packet ration and the higher are the collisions. With 3 nodes the ratio is almost always 1, which means that the nodes are managing to send all the packets in their queues. When we arrive at 25 nodes, their packet ratio is almost constant at 0.1250. The number of packets over time also decreases, due to the fact that nodes are busy sending the same packet over and over again because of the collisions.
+\nl
+If we vary the packet generation probability instead:
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Classic_5_nodes_0.001}
+	\centering
+	\includegraphics[width=\linewidth]{Classic_5_nodes_0.001}
+	\caption{Classic CSMA/CA with 5 nodes and packet probability = 0.001}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Classic_5_nodes_0.005}
+	\centering
+	\includegraphics[width=\linewidth]{Classic_5_nodes_0.005}
+	\caption{Classic CSMA/CA with 5 nodes and packet probability = 0.005}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Classic_5_nodes_0.01_2}
+	\centering
+	\includegraphics[width=\linewidth]{Classic_5_nodes_0.01}
+	\caption{Classic CSMA/CA with 5 nodes and packet probability = 0.01}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Classic_5_nodes_0.05}
+	\centering
+	\includegraphics[width=\linewidth]{Classic_5_nodes_0.05}
+	\caption{Classic CSMA/CA with 5 nodes and packet probability = 0.05}
+\end{figure}
+\FloatBarrier
+We can notice that when the probability is low (0.001), the packets are generated so rarely that there are no collisions and that sometimes the channel is completely idle (the lower spikes in the packet ratio). When we increase the probability, we notice an increase in the number of packets sent, from 100 to 500 to 1000 and in collisions too. However, when the probability is too high, there are too many collisions and the number of packets sent doesn't increase anymore; we can also see the effect with the packet ratio, that is around 0.2.
+\subsection{Adaptive CSMA/CA}
+In the Adaptive CSMA/CA protocol there're three parameters that we can change: the number of nodes, the packet generation probability and the exploration coefficient ($\epsilon$).
+We start with the number of nodes:
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{RL_3_nodes_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{RL_3_nodes_ε_0.01_p_0.01}
+	\caption{Adaptive CSMA/CA with 3 nodes, packet probability = 0.01 and $\epsilon$ = 0.01}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{RL_5_nodes_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{RL_5_nodes_ε_0.01_p_0.01}
+	\caption{Adaptive CSMA/CA with 5 nodes, packet probability = 0.01 and $\epsilon$ = 0.011}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{RL_10_nodes_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{RL_10_nodes_ε_0.01_p_0.01}
+	\caption{Adaptive CSMA/CA with 10 nodes, packet probability = 0.01 and $\epsilon$ = 0.01}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{RL_25_nodes_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{RL_25_nodes_ε_0.01_p_0.01}
+	\caption{Adaptive CSMA/CA with 25 nodes, packet probability = 0.01 and $\epsilon$ = 0.01}
+\end{figure}
+\FloatBarrier
+Just like in the Classic CSMA/CA, the higher the number of nodes and higher is the number of collisions and the lower is the packet ratio. But in general, the Adaptive CSMA/CA, manages to send more packets with the same conditions.
+\nl
+If we consider the packet probability instead:
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{RL_5_nodes_0.001}
+	\centering
+	\includegraphics[width=\linewidth]{RL_5_nodes_ε_0.01_p_0.001}
+	\caption{Adaptive CSMA/CA with 5 nodes, packet probability = 0.001 and $\epsilon$ = 0.01}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{RL_5_nodes_0.005}
+	\centering
+	\includegraphics[width=\linewidth]{RL_5_nodes_ε_0.01_p_0.005}
+	\caption{Adaptive CSMA/CA with 5 nodes, packet probability = 0.005 and $\epsilon$ = 0.01}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{RL_5_nodes_0.01_2}
+	\centering
+	\includegraphics[width=\linewidth]{RL_5_nodes_ε_0.01_p_0.01}
+	\caption{Adaptive CSMA/CA with 5 nodes, packet probability = 0.01 and $\epsilon$ = 0.01}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{RL_5_nodes_0.05}
+	\centering
+	\includegraphics[width=\linewidth]{RL_5_nodes_ε_0.01_p_0.05}
+	\caption{Adaptive CSMA/CA with 5 nodes, packet probability = 0.05 and $\epsilon$ = 0.01}
+\end{figure}
+\FloatBarrier
+Here we can notice how, by increasing the probability of generating a packet, we still manage to send more packets than before. The protocol can resist much more to the increase of packets per node, but still fails at the extremes: if there are too many packets, the congestion can't be solved anymore, if there are too few (like the first case), there might still be collisions because there are too few examples to learn from and the nodes can't adapt well to the environment.
+Finally, we consider varying the exploration probability $\epsilon$:
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{RL_5_nodes_e_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{RL_5_nodes_ε_0.01_p_0.01}
+	\caption{Adaptive CSMA/CA with 5 nodes, packet probability = 0.01 and $\epsilon$ = 0.01}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{RL_5_nodes_e_0.1}
+	\centering
+	\includegraphics[width=\linewidth]{RL_5_nodes_ε_0.1_p_0.01}
+	\caption{Adaptive CSMA/CA with 5 nodes, packet probability = 0.01 and $\epsilon$ = 0.1}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{RL_5_nodes_e_0.5}
+	\centering
+	\includegraphics[width=\linewidth]{RL_5_nodes_ε_0.5_p_0.01}
+	\caption{Adaptive CSMA/CA with 5 nodes, packet probability = 0.01 and $\epsilon$ = 0.5}
+\end{figure}
+\FloatBarrier
+The higher $\epsilon$ is and the more we explore, indeed we can notice this effect with the packet ratio, that oscillates more when $\epsilon$ is increased.
+\section{Comparison of performances}
+Now that we have analyzed how the performance of the two protocols varies when we change their parameters, we can fix some parameters and compare the two approaches. From now on we will consider $\epsilon$ of 0.01. The metrics used are:
+\begin{LaTeXdescription}
+	\item[$\bullet$ Throughput] Amount of useful data transmitted per time unit.
+	\item[$\bullet$ Packet delivery ratio] The number of packets that have arrived successfully over the total number of packets generated.
+	\item[$\bullet$ Collisions] The number of collisions that occurred in the simulation.
+\end{LaTeXdescription}
+\nl
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Comparison_5_nodes_p_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{Comparison_5_nodes_ε_0.01_p_0.001}
+	\caption{Comparison with 5 nodes, packet probability = 0.001 and $\epsilon$ = 0.5}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Comparison_5_nodes_p_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{Comparison_5_nodes_ε_0.01_p_0.01}
+	\caption{Comparison with 5 nodes, packet probability = 0.01 and $\epsilon$ = 0.5}
+\end{figure}
+\FloatBarrier
+With 5 nodes and packet probability generation of 0.01 and 0.001 the overall performance is the same. We can however notice how in the case of p = 0.001, the Adaptive approach has an initial phase of collisions and then a steady one without any additional one. This is given to the exploration phase: once the algorithm found the right actions to perform, there are no more collisions.
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Comparison_10_nodes_p_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{Comparison_10_nodes_ε_0.01_p_0.001}
+	\caption{Comparison with 10 nodes, packet probability = 0.001 and $\epsilon$ = 0.5}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Comparison_10_nodes_p_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{Comparison_10_nodes_ε_0.01_p_0.01}
+	\caption{Comparison with 10 nodes, packet probability = 0.01 and $\epsilon$ = 0.5}
+\end{figure}
+\FloatBarrier
+With 10 nodes instead, with a low probability we still can detect the exploration phase on the collisions, but with a higher probability, the performance improves both in all the metrics.
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Comparison_25_nodes_p_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{Comparison_25_nodes_ε_0.01_p_0.001}
+	\caption{Comparison with 25 nodes, packet probability = 0.001 and $\epsilon$ = 0.5}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Comparison_25_nodes_p_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{Comparison_25_nodes_ε_0.01_p_0.01}
+	\caption{Comparison with 25 nodes, packet probability = 0.01 and $\epsilon$ = 0.5}
+\end{figure}
+\FloatBarrier
+The same pattern can be seen with 25 nodes, but this time, the improvement is even greater with probability of 0.01, where the collisions are reduced by a third and the packet ratio and throughput are doubled.
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Comparison_50_nodes_p_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{Comparison_50_nodes_ε_0.01_p_0.001}
+	\caption{Comparison with 50 nodes, packet probability = 0.001 and $\epsilon$ = 0.5}
+\end{figure}
+\FloatBarrier
+\begin{figure}[ht]
+	\renewcommand{\arraystretch}{2.0}
+	\label{Comparison_50_nodes_p_0.01}
+	\centering
+	\includegraphics[width=\linewidth]{Comparison_50_nodes_ε_0.01_p_0.01}
+	\caption{Comparison with 50 nodes, packet probability = 0.01 and $\epsilon$ = 0.5}
+\end{figure}
+\FloatBarrier
+When we run the simulation with 50 nodes we can clearly see the advantage of using the adaptive method over the classical one: throughput and packet ratio are doubled and collisions are halved independently of the probability. Moreover, we can see how with a low probability, the Adaptive approach manages to send all the packets in the queues of all the nodes (the packet ratio is constantly at 1), while in the Classic CSMA/CA, on average nodes don't manage to send half of the packets in queue.
+\section{Conclusions}
+From the simulations that were conducted, we can see the improvement that the Adaptive CSMA CA brings. When multiple nodes are transmitting, using a Reinforcement Learning approach, outperforms the classical one by double the amount of throughput and packet delivery ratio. This is due to the fact that each node learns how to deal with collisions, so in case every node needs to send a packet, they learn how to coordinate, leading to be able to not discard packets even in extreme situations such as having 50 nodes communicating at the same time.
+\section{Theoretical weights from map}
+As\cite{googlemapsnolabels}.
+\nl
+\begin{enumerate}
+\item parks and water ares (in light green and blue)
+\end{enumerate}
+\bibliographystyle{IEEEtran}
+\bibliography{IEEEabrv, proj_bibliography}
+
+\begin{thebibliography}{9}
+	\bibitem{googlemapsnolabels}
+	https://mapstyle.withgoogle.com
+	\end{thebibliography}
+\end{document}
