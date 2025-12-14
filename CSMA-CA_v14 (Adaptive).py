@@ -4,11 +4,11 @@ import numpy as np
 import csv
 
 # Simulation parameters
-TIME_SLOTS = 10000
-PACKET_PROBABILITY = 0.03
+TIME_SLOTS = 100000 # number of time slots to simulate
+PACKET_PROBABILITY = 0.01 # probability of generating a new packet in each time slot
 PACKET_LENGTH = 4
-NUM_NODES = 15
-TIME_STEP_MS = 200
+NUM_NODES = 50
+TIME_STEP_MS = 200 # milliseconds per time slot in the GUI animation
 
 # Protocol constants
 DIFS_DURATION = 3
@@ -29,46 +29,45 @@ RECEIVER_SENDING_CTS = 1
 RECEIVER_SENDING_ACK = 2
 RECEIVER_COLLISION = 3
 
-
 PACKETS_SENT = [0] * NUM_NODES
 TOT_PACKETS = [0] * NUM_NODES
 COLLISIONS = [0] * NUM_NODES
 
+# The seed for the random packet generation. It's fixed for reproducibility
 rn.seed(1)
 
 list_packets_sent = []
 list_tot_packets = []
 list_collisions = []
 
-class RTSPacket:
+class RTSPacket: # The packet for the Request To Send. It includes the sender ID and the total transmission duration for NAV
     def __init__(self, sender_id, data_length):
         self.sender_id = sender_id
         self.total_duration = data_length + RTS_CTS_ACK_OVERHEAD
 
 
-class CTSPacket:
+class CTSPacket: # The packet for the Clear To Send. It includes the destination ID
     def __init__(self, destination_id):
         self.destination_id = destination_id
 
 
-class DataPacket:
+class DataPacket: # The data packet. It includes the sender ID and whether it's the last packet in the transmission for the ACK
     def __init__(self, sender_id, is_last=False):
         self.sender_id = sender_id
         self.is_last = is_last
 
 
-class ACKPacket:
+class ACKPacket: # The Acknowledgment packet. It includes the destination ID
     def __init__(self, destination_id):
         self.destination_id = destination_id
 
 
-class QLearningBackoff:
-    """Q-Learning agent for adaptive backoff duration"""
+class QLearningBackoff: # Q-Learning agent for adaptive backoff duration
     def __init__(self, min_backoff=1, max_backoff=10):
         self.min_backoff = min_backoff
         self.max_backoff = max_backoff
-        
-        # State: number of recent collisions (0, 1, 2, 3+)
+
+        # States: combinations of collision levels (0-3) and queue length levels (0-3)
         self.num_states = 16 # 4 collision levels x 4 queue length levels
         # Actions: backoff durations from min to max
         self.num_actions = max_backoff - min_backoff + 1
@@ -88,43 +87,25 @@ class QLearningBackoff:
         self.last_action = 0
         
     def get_state(self):
-        if self.recent_collisions == 0 and (self.packets_in_queue >= 0 and self.packets_in_queue <= 3):
-            return 0
-        elif self.recent_collisions == 1 and (self.packets_in_queue >= 0 and self.packets_in_queue <= 3):
-            return 1
-        elif self.recent_collisions == 2 and (self.packets_in_queue >= 0 and self.packets_in_queue <= 3):
-            return 2
-        elif self.recent_collisions >= 3 and (self.packets_in_queue >= 0 and self.packets_in_queue <= 3):
-            return 3
-        elif self.recent_collisions == 0 and (self.packets_in_queue >= 4 and self.packets_in_queue <= 7):
-            return 4
-        elif self.recent_collisions == 1 and (self.packets_in_queue >= 4 and self.packets_in_queue <= 7):
-            return 5
-        elif self.recent_collisions == 2 and (self.packets_in_queue >= 4 and self.packets_in_queue <= 7):
-            return 6
-        elif self.recent_collisions >= 3 and (self.packets_in_queue >= 4 and self.packets_in_queue <= 7):
-            return 7
-        elif self.recent_collisions == 0 and (self.packets_in_queue >= 8 and self.packets_in_queue <= 15):
-            return 8
-        elif self.recent_collisions == 1 and (self.packets_in_queue >= 8 and self.packets_in_queue <= 15):
-            return 9
-        elif self.recent_collisions == 2 and (self.packets_in_queue >= 8 and self.packets_in_queue <= 15):
-            return 10
-        elif self.recent_collisions >= 3 and (self.packets_in_queue >= 8 and self.packets_in_queue <= 15):
-            return 11
-        elif self.recent_collisions == 0 and (self.packets_in_queue >= 16):
-            return 12
-        elif self.recent_collisions == 1 and (self.packets_in_queue >= 16):
-            return 13
-        elif self.recent_collisions == 2 and (self.packets_in_queue >= 16):
-            return 14
-        elif self.recent_collisions >= 3 and (self.packets_in_queue >= 16):
-            return 15
+            # Given the current number of packets in queue and recent collisions, return the state index
+            if self.packets_in_queue <= 3:
+                state_from_packets = 0
+            elif self.packets_in_queue <= 7:
+                state_from_packets = 1
+            elif self.packets_in_queue <= 15:
+                state_from_packets = 2
+            else:
+                state_from_packets = 3
+            # the state is influenced only if we have, 0 1, 2, or 3+ recent collisions
+            state_from_collisions = min(self.recent_collisions, 3)
+
+            return state_from_packets * 4 + state_from_collisions
     
     def update_packet_queue(self, packets_in_queue):
+        # Function called every time the data queue is updated, so to understand the current state
         self.packets_in_queue = packets_in_queue
 
-    def choose_action(self, state):# Epsilon-greedy action selection
+    def choose_action(self, state): # Epsilon-greedy action selection
         if rn.random() < self.epsilon:
             # Explore: random action
             action = rn.randint(0, self.num_actions)
@@ -137,7 +118,7 @@ class QLearningBackoff:
         return self.min_backoff + action
     
     def update(self, state, action, reward, next_state): # Q-learning update
-        best_next_action = np.argmax(self.q_table[next_state])
+        best_next_action = np.argmax(self.q_table[next_state]) # best action for next state
         td_target = reward + self.discount_factor * self.q_table[next_state, best_next_action]
         td_error = td_target - self.q_table[state, action]
         self.q_table[state, action] += self.learning_rate * td_error
@@ -152,13 +133,15 @@ class QLearningBackoff:
         return self.action_to_backoff(action)
     
     def report_success(self):
-        next_state = 0  # Reset collision count after success
+        # In case the node manages to send a packet, we give a positive reward
         reward = 10  # Large positive reward for success
-        
-        self.update(self.last_state, self.last_action, reward, next_state)
         self.recent_collisions = 0
+        next_state = self.get_state()
+
+        self.update(self.last_state, self.last_action, reward, next_state)
     
     def report_collision(self):
+        # In case of collision, we give a negative reward
         self.recent_collisions += 1
         next_state = self.get_state()
         reward = -5  # Negative reward for collision
@@ -173,11 +156,11 @@ class TransmitterNode:
         self.packet_length = packet_length
         
         # State variables
-        self.data_queue = 0
-        self.nav_timer = 0
-        self.difs_timer = 0
-        self.backoff_timer = 0
-        self.data_remaining = 0
+        self.data_queue = 0  # Number of packets waiting to send
+        self.nav_timer = 0  # Network Allocation Vector
+        self.difs_timer = 0  # DCF Interframe Space timer
+        self.backoff_timer = 0  # Exponential backoff timer
+        self.data_remaining = 0  # Data slots remaining to transmit
         
         # Status flags
         self.waiting_for_cts = False
@@ -197,11 +180,12 @@ class TransmitterNode:
         self.backoff_timer = self.rl_agent.get_backoff_duration()
     
     def process_timestep(self, channel, t, activity_log):
-        self.generate_new_data()
+        # The actual action the node performs
+        self.generate_new_data() # We first check if new data is generated
         current_channel = channel[t]
         prev_channel = channel[t-1] if t > 0 else None
         
-        # If NAV is initialized, I must wait
+        # If NAV is initialized, I wait
         if self.nav_timer > 0:
             self.nav_timer -= 1
             self.waiting_for_cts = False
@@ -213,32 +197,32 @@ class TransmitterNode:
             self.ready_to_send = False
             return
         
-        # If I detected a collision in previous slot
+        # If I detected a collision in previous slot, I handle it with the adaptive backoff
         if isinstance(prev_channel, RTSPacket) and prev_channel.sender_id == "COLLISION":
             self._handle_collision(t, activity_log)
             return
         
-        # If I received RTS from another node, set NAV
+        # If I received RTS from another node, I read the duration and set NAV
         if isinstance(prev_channel, RTSPacket) and prev_channel.sender_id != self.node_id:
             self._handle_others_rts(prev_channel, t, activity_log)
             return
         
-        # If I have received a CTS
+        # If I have received a CTS, I prepare to send data
         if isinstance(current_channel, CTSPacket) and current_channel.destination_id == self.node_id:
             self._handle_cts_received(activity_log, t)
             return
         
-        # Sending data
+        # If I have received a CTS and I still have data to send, I continue sending data
         if self.has_cts and self.data_remaining > 0:
             self._send_data(channel, t, activity_log)
             return
         
-        # Finished sending data
+        # If I have finished sending data, I end the transmission
         if self.has_cts and self.data_remaining == 0:
             self._finish_transmission()
             return
         
-        # Waiting for CTS response
+        # Waiting for CTS response (we can have one slot delay)
         if self.waiting_for_cts:
             self.waiting_for_cts = False
             return
@@ -259,7 +243,7 @@ class TransmitterNode:
             self.backoff_timer = 0
             activity_log[t] = STATE_BACKOFF
             if self.data_queue > 0:
-                self._try_send_rts_after_backoff(channel, t, activity_log)
+                self._try_send_rts(channel, t, activity_log)
             return
         
         # If the channel is idle and I have data to send, start DIFS
@@ -271,6 +255,7 @@ class TransmitterNode:
                 self.rl_agent.report_success()
     
     def _handle_collision(self, t, activity_log):
+        # Since a colission happened, we reset the DIFS timer and the waiting_for_cts flag
         self.difs_timer = 0
         self.waiting_for_cts = False
         COLLISIONS[int(self.node_id)-1] += 1
@@ -288,6 +273,7 @@ class TransmitterNode:
             activity_log[t] = STATE_IDLE
     
     def _handle_others_rts(self, rts_packet, t, activity_log):
+        # We read the packet, set the NAV accordingly and reset the other flags
         self.nav_timer = rts_packet.total_duration
         self.difs_timer = 0
         self.backoff_timer = 0
@@ -295,17 +281,20 @@ class TransmitterNode:
         self.nav_timer -= 1
     
     def _handle_cts_received(self, activity_log, t):
+        # We set the CTS and ready to send data flags to True
         self.has_cts = True
         self.ready_to_send = True
         self.data_remaining = self.packet_length
     
     def _send_data(self, channel, t, activity_log):
+        # Since we've sent data for one slot, we decrement the remaining data
         self.data_remaining -= 1
-        is_last = (self.data_remaining == 0)
+        is_last = (self.data_remaining == 0) # Check if this is the last packet for ACK
         channel[t] = DataPacket(self.node_id, is_last)
         activity_log[t] = STATE_SENDING_DATA
     
     def _finish_transmission(self):
+        # Reset flags and decrement data queue
         self.has_cts = False
         self.data_queue -= 1
         PACKETS_SENT[int(self.node_id)-1] += 1
@@ -313,7 +302,7 @@ class TransmitterNode:
     def _handle_difs(self, channel, t, activity_log):
         self.difs_timer -= 1
         activity_log[t] = STATE_WAITING_DIFS
-        
+        # We decrement DIFS and then if we are done, we check the channel
         if self.difs_timer == 0:
             # DIFS complete, try to send RTS
             if channel[t] is None:
@@ -322,7 +311,8 @@ class TransmitterNode:
                 self.waiting_for_cts = True
                 activity_log[t] = STATE_SENDING_RTS
             elif isinstance(channel[t], RTSPacket):
-                # Collision detected
+                # If I see a packet already in the channel, I can't stop it since we're in the CSMA-CA
+                # So I just send it but I set the destination to COLLISION
                 channel[t] = RTSPacket("COLLISION", self.packet_length)
                 self.waiting_for_cts = True
                 activity_log[t] = STATE_SENDING_RTS
@@ -330,7 +320,7 @@ class TransmitterNode:
                 # Channel busy with other traffic, stay idle
                 activity_log[t] = STATE_IDLE
     
-    def _try_send_rts_after_backoff(self, channel, t, activity_log):
+    def _try_send_rts(self, channel, t, activity_log):
         self.backoff_timer = 0
         
         if channel[t] is None:
@@ -364,6 +354,7 @@ class ReceiverNode:
             self.expected_duration = current_channel.total_duration
             
             if self.destination_id == "COLLISION":
+                # If we detected a collision, we don't send CTS
                 self.should_send_cts = False
                 receiver_log[time_idx] = RECEIVER_COLLISION
             else:
@@ -391,24 +382,25 @@ class ReceiverNode:
 
 
 def run_simulation(num_slots, num_nodes, packet_prob, packet_length):
+    # Initialize channel and logs
     channel = [None] * num_slots
     receiver_log = [RECEIVER_IDLE] * num_slots
     node_logs = [[STATE_IDLE] * num_slots for _ in range(num_nodes)]
+    backoffs = [[0 for i in range (num_nodes)] for j in range(num_slots)]
     
     # Create nodes
     nodes = [
         TransmitterNode(str(i + 1), packet_prob, packet_length)
         for i in range(num_nodes)
     ]
-    receiver = ReceiverNode()
-    backoffs = [[0 for i in range (num_nodes)] for j in range(num_slots)]
+    receiver = ReceiverNode() # create the receiver node
     # Run simulation
     for t in range(num_slots):
         for idx, node in enumerate(nodes):
             node.process_timestep(channel, t, node_logs[idx])
             backoffs[t][int(node.node_id)-1] = node.backoff_timer
         receiver.process_timestep(channel, t, receiver_log)
-        if t % 1000 == 0 and t > 0:
+        if t % 1000 == 0 and t > 0: # we write data every 1000 time slots for the plots
             list_packets_sent.append(PACKETS_SENT.copy())
             list_tot_packets.append(TOT_PACKETS.copy())
             list_collisions.append(COLLISIONS.copy())
@@ -435,13 +427,14 @@ class CSMAGui:
                       5: "light green", 6: "dark olive green", 7: "yellow", 8: "dark turquoise", 
                       9: "grey", 10: "dark red"}
 
-        rows = 2 + self.num_nodes
+        rows = 2 + self.num_nodes # One row for channel, one for receiver, rest for nodes
         width = self.left_margin + self.cell_width * self.time_slots
         height = self.row_height * (rows + 1 + len(self.colors)) + 200
 
         self.canvas = tk.Canvas(root, width=width, height=height, bg="white")
         self.canvas.pack()
 
+        # Create rectangles for channel, nodes, and receiver
         self.channel_rects = [None] * self.time_slots
         self.node_rects = [[None] * self.time_slots for _ in range(self.num_nodes)]
         self.receiver_rects = [None] * self.time_slots
@@ -458,6 +451,7 @@ class CSMAGui:
         tk.Button(btn_frame, text="Show Q-tables", command=self.show_q_tables).pack()
 
     def draw_static_grid(self):
+        # Draw labels and grid lines
         for row in range(0, 2 + self.num_nodes):
             y0 = row * self.row_height
             y1 = y0 + self.row_height
@@ -547,6 +541,7 @@ class CSMAGui:
         text.config(state=tk.DISABLED)
 
     def start_animation(self):
+        # fills all the channel rectangles in light grey and all node and receiver rectangles in white
         for t in range(self.time_slots):
             self.canvas.itemconfig(self.channel_rects[t], fill="light grey")
             for row in range(self.num_nodes):
@@ -556,6 +551,7 @@ class CSMAGui:
         self.animate_step()
 
     def animate_step(self):
+        # Color the rectangles for the current time slot based on the simulation data
         if self.current_t >= self.time_slots:
             return
 
@@ -588,11 +584,12 @@ if __name__ == "__main__":
         packet_length=PACKET_LENGTH
     )
 
+    # Save data to CSV files
     csv.writer(open("data/packets_sent_RL.csv", "w", newline="")).writerows(list_packets_sent)
     csv.writer(open("data/collisions_RL.csv", "w", newline="")).writerows(list_collisions)
     csv.writer(open("data/tot_packets_RL.csv", "w", newline="")).writerows(list_tot_packets)
 
-    if True:
+    if False: # Change to True to enable GUI
         root = tk.Tk()
         root.title("CSMA-CA with Q-Learning Backoff")
         app = CSMAGui(root, channel, node_activities, receiver, nodes, step_ms=TIME_STEP_MS)

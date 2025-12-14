@@ -1,13 +1,16 @@
 import matplotlib.pyplot as plt
 from numpy import cumsum as cs
 from numpy import insert
+
 n, p = 25, 0.01
 
 def running_mean(x, N):
+    # In case we have too many data points, to avoid fluctuations we use a running mean over N points
     cumsum = cs(insert(x, 0, 0)) 
     return (cumsum[N:] - cumsum[:-N]) / float(N)
 
 def read_csv_data(filename):
+    # Open the CSV files
     data = []
     with open(filename, 'r') as file:
         for line in file:
@@ -15,6 +18,7 @@ def read_csv_data(filename):
 
     return data
 
+# Read data from CSV files
 list_packets_sent_RL = read_csv_data("data/packets_sent_RL.csv")
 list_collisions_RL = read_csv_data("data/collisions_RL.csv")
 list_tot_packets_RL = read_csv_data("data/tot_packets_RL.csv")
@@ -27,6 +31,7 @@ list_std_classic = read_csv_data("data/backoffs_classic_n_" + str(n) + "_p_" + s
 list_std_RL = read_csv_data("data/backoffs_RL_n_" + str(n) + "_p_" + str(p) + ".csv")
 
 def plot_one_result(list_packets_sent_classic, list_collisions_classic, list_tot_packets_classic):
+    # Plot only one result set
     fig, axs = plt.subplots(3, 1, dpi=100, figsize=(8, 8))
     fig.tight_layout()
 
@@ -56,6 +61,7 @@ def plot_one_result(list_packets_sent_classic, list_collisions_classic, list_tot
 
 
 def plot_total_results(list_packets_sent_RL, list_packets_sent_classic, list_collisions_RL, list_collisions_classic, list_tot_packets_RL, list_tot_packets_classic):
+    # Plot both results for comparison
     fig, axs = plt.subplots(3, 1, dpi=100, figsize=(8, 8), constrained_layout=True)
     #fig.tight_layout()
 
@@ -96,6 +102,7 @@ def plot_total_results(list_packets_sent_RL, list_packets_sent_classic, list_col
 
 
 def plot_results_per_node(RL_data, classic_data, title, node_index):
+    # Plot results for a specific node
     data_node_i_RL = [RL_data[i][node_index] for i in range(len(list_packets_sent_RL))]
     data_node_i_classic = [classic_data[i][node_index] for i in range(len(list_packets_sent_classic))]
     
@@ -112,7 +119,7 @@ def plot_results_per_node(RL_data, classic_data, title, node_index):
 
 def plot_standard_deviations(RL_data, classic_data, title):
     import numpy as np
-
+    # Plot standard deviations over time
     std_dev_RL = [np.std(RL_data[i]) for i in range(len(RL_data))]
     std_dev_classic = [np.std(classic_data[i]) for i in range(len(classic_data))]
 
@@ -128,14 +135,7 @@ def plot_standard_deviations(RL_data, classic_data, title):
     plt.grid()
     plt.show()
 
-"""
-print("Packets sent per node:", PACKETS_SENT)
-print("Total packets generated per node:", TOT_PACKETS)
-print("Throughput per node:", [sent / TIME_SLOTS for sent in PACKETS_SENT])
-print("Collisions:", COLLISIONS[0])
-ratio = [TOT_PACKETS[i]/PACKETS_SENT[i] if PACKETS_SENT[i] > 0 else float('inf') for i in range(NUM_NODES)]
-print("Ratio of total packets to sent packets:", ratio)
-"""
+
 #for i in range(3):
     #plot_results(list_packets_sent_RL, list_packets_sent_classic, "Packets Sent Over Time by Node " + str(i), i)
 plot_total_results(list_packets_sent_RL, list_packets_sent_classic, list_collisions_RL, list_collisions_classic, list_tot_packets_RL, list_tot_packets_classic)

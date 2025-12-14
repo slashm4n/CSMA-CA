@@ -41,10 +41,19 @@
 The goal of this project is to create a simulation for the CSMA/CA protocol. Two versions were created: a standard one and an adaptive one with a Reinforcement Learning approach. The two methods were compared according to some metrics such as the throughput and the packet delivery ratio.
 \end{abstract}
 
-\section{Simulation}
-In this project, I present a simulation of the CSMA/CA protocol both in the classical and in the adaptive version with Reinforcement Learning. Everything was developed in Python.
+\section{The protocol}
+In this project, I present a simulation of the CSMA/CA protocol both in the classical and in the adaptive version with Reinforcement Learning.
 \nl
-The parameters of the simulation are:
+In the Carrier-sense multiple access with collision avoidance (CSMA/CA) protocol, nodes attempt to avoid a collision by transmitting only when the channel is sensed to be free. However, due to several issues such as the hidden terminal problem, the protocol was extended with the usage of the Request To Send (RTS) and Clear To Send (CTS) packets: when a node wants to send a packet and senses the channel free, it first sends an RTS to the receiver and starts to transmit only after having received a CTS. After having received the packet, the receiver sends an ACK back. In this way the hidden terminal problem is solved, indeed, when a node receives an RTS, it reads the length of the data and delays all the transmission for that amount of time (the timer is set in the NAV).
+\nl
+Nonetheless, collisions can still occur, especially if multiple nodes send RTS packets at the same time. The difference between the two protocols is in this step: in the classic one, all the nodes wait for a random amount of time from 0 to a contention window and then send their packet (the first one who finishes will be the one to send) and in case of collision, the contention window is increased; in the adaptive one, each node has a reinforcement learning agent that learns how to deal with collisions and makes the node wait a proper amount of time.
+\nl
+In this simulation, the RL algorithm that I chose is the Q-learning one. In Q-learning, every time we compute a new action, we store the reward and then we evaluate the TD error, the difference between the discounted best next Q-state and the current one.
+\nl
+$Q(s,a) \leftarrow Q(s,a) + \alpha \left[ r + \gamma \max_{a'} Q(s', a') - Q(s,a) \right]$
+\nl
+\section{Simulation}
+The simulation of the two protocols was developed in Python. It has some tunable parameters, namely:
 \begin{itemize}
 	\item Number of nodes
 	\item Packet length
@@ -52,7 +61,7 @@ The parameters of the simulation are:
 	\item Number of timesteps of the simulation
 \end{itemize}
 \subsection{Classic CSMA/CA}
-The first step was to create a simulation of the classic CSMA/CA protocol.
+The first step was to create a simulation of the classic CSMA/CA protocol\cite{classic_CSMA_CA}.
 \nl
 I created a class for the transmitter node, a class for the receiver node and a class for each kind of packet (data, RTS, CTS and ACK).
 \nl
@@ -62,13 +71,7 @@ The receiver node is always listening to the channel and it just sends the CTS, 
 \nl
 The RTS packet contains the sender id and the amount of time the other nodes should wait in NAV. The CTS packet has just the destination id. The data packet has the sender id and a flag that is marked only when the data is finished (to notify the receiver). The ACK packet has instead only the destination id.
 \subsection{Adaptive CSMA/CA}
-In the Adaptive CSMA/CA another class was added: the RL agent. There is one agent per node. The algorithm I implemented is the Q-learning one.
-\nl
-In Q-learning, every time we compute a new action, we store the reward and then we evaluate the TD error, the difference between the discounted best next Q-state and the current one.
-\nl
-$Q(s,a) \leftarrow Q(s,a) + \alpha \left[ r + \gamma \max_{a'} Q(s', a') - Q(s,a) \right]$
-\nl
-The agent is called only in two situations: when there's a collision (negative reward) and when there's a successful transmission (positive reward). The agent replaces the exponential backoff, so the possible actions are the amount of time the node should wait. The state is instead given by the number of collisions since the last successful transmission.
+In the Adaptive CSMA/CA\cite{adaptive_CSMA_CA}, another class was added: the RL agent. There is one agent per node that is called only in two situations: when there's a collision (negative reward) and when there's a successful transmission (positive reward). The agent replaces the exponential backoff, so the possible actions are the amount of time the node should wait. The state is instead given by the number of collisions since the last successful transmission.
 \nl
 Since each node is independent, they all have a separate Q-table. The states are 16 are they are based on possible ranges of recent collisions:
 \begin{itemize}
@@ -105,7 +108,7 @@ All the actions of the nodes and the status of the channel are saved in separate
 \end{figure}
 \FloatBarrier
 \section{Performance}
-In this section we are going to analyze how the performance of a single protocol varies by changing the parameters. Three metrics were considered:
+In this section we are going to analyze how the performance of a single protocol varies by changing the parameters\cite{stats}. Three metrics were considered:
 \begin{LaTeXdescription}
 	\item[$\bullet$ Packets sent] The total number of packets that have been successfully sent. Since the packets have a fixed length and we're comparing simulations with the same random seed and with the same time length, this is equivalent to the throughput (only the values change, but the graph is the same).
 	\item[$\bullet$ Packet delivery ratio] The number of packets that have arrived successfully over the total number of packets generated.
@@ -149,7 +152,7 @@ We start with the number of nodes:
 	\caption{Classic CSMA/CA with 25 nodes and packet probability = 0.01}
 \end{figure}
 \FloatBarrier
-We can see that the higher the number of nodes and the lower is the packet ration and the higher are the collisions. With 3 nodes the ratio is almost always 1, which means that the nodes are managing to send all the packets in their queues. When we arrive at 25 nodes, their packet ratio is almost constant at 0.1250. The number of packets over time also decreases, due to the fact that nodes are busy sending the same packet over and over again because of the collisions.
+We can see that the higher the number of nodes and the lower is the packet ratio and the higher are the collisions. With 3 nodes the ratio is almost always 1, which means that the nodes are managing to send all the packets in their queues. When we arrive at 25 nodes, their packet ratio is almost constant at 0.1250. The number of packets over time also decreases, due to the fact that nodes are busy sending the same packet over and over again because of the collisions.
 \nl
 If we vary the packet generation probability instead:
 \begin{figure}[ht]
@@ -359,18 +362,16 @@ The same pattern can be seen with 25 nodes, but this time, the improvement is ev
 \FloatBarrier
 When we run the simulation with 50 nodes we can clearly see the advantage of using the adaptive method over the classical one: throughput and packet ratio are doubled and collisions are halved independently of the probability. Moreover, we can see how with a low probability, the Adaptive approach manages to send all the packets in the queues of all the nodes (the packet ratio is constantly at 1), while in the Classic CSMA/CA, on average nodes don't manage to send half of the packets in queue.
 \section{Conclusions}
-From the simulations that were conducted, we can see the improvement that the Adaptive CSMA CA brings. When multiple nodes are transmitting, using a Reinforcement Learning approach, outperforms the classical one by double the amount of throughput and packet delivery ratio. This is due to the fact that each node learns how to deal with collisions, so in case every node needs to send a packet, they learn how to coordinate, leading to be able to not discard packets even in extreme situations such as having 50 nodes communicating at the same time.
-\section{Theoretical weights from map}
-As\cite{googlemapsnolabels}.
-\nl
-\begin{enumerate}
-\item parks and water ares (in light green and blue)
-\end{enumerate}
+From the simulations that were conducted, we can see the improvement that the Adaptive CSMA/CA brings. When multiple nodes are transmitting, the Reinforcement Learning approach outperforms the classical one by double the amount of throughput and packet delivery ratio. This is because now each node learns how to deal with collisions, so they are able to coordinate; even in extreme scenarios, such as having 50 nodes communicating at the same time, the nodes are able to empty their queues and not discarding any packet.
 \bibliographystyle{IEEEtran}
 \bibliography{IEEEabrv, proj_bibliography}
 
 \begin{thebibliography}{9}
-	\bibitem{googlemapsnolabels}
-	https://mapstyle.withgoogle.com
+	\bibitem{classic_CSMA_CA}
+	https://github.com/slashm4n/CSMA-CA/blob/main/CSMA-CA\_v11\%20(Classic).py
+	\bibitem{adaptive_CSMA_CA}
+	https://github.com/slashm4n/CSMA-CA/blob/main/CSMA-CA\_v14\%20(Adaptive).py
+	\bibitem{stats}
+	https://github.com/slashm4n/CSMA-CA/blob/main/plot\_statistics.py
 	\end{thebibliography}
 \end{document}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.6.2)  8 DEC 2025 15:26
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (MiKTeX 24.4) (preloaded format=pdflatex 2024.6.2)  13 DEC 2025 22:32
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1137,251 +1137,261 @@ File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 ))
 LaTeX Font Info:    Font shape `T1/fnc/m/sc' will be
 (Font)              scaled to size 10.22992pt on input line 44.
-LaTeX Font Info:    Calculating math sizes for size <11> on input line 49.
+LaTeX Font Info:    Calculating math sizes for size <11> on input line 53.
 LaTeX Font Info:    Font shape `T1/fnc/m/n' will be
-(Font)              scaled to size 7.77467pt on input line 49.
+(Font)              scaled to size 7.77467pt on input line 53.
 LaTeX Font Info:    Font shape `T1/fnc/m/n' will be
-(Font)              scaled to size 6.138pt on input line 49.
+(Font)              scaled to size 6.138pt on input line 53.
 LaTeX Font Info:    Font shape `FMX/futm/m/n' will be
-(Font)              scaled to size 10.11998pt on input line 49.
+(Font)              scaled to size 10.11998pt on input line 53.
 LaTeX Font Info:    Font shape `FMX/futm/m/n' will be
-(Font)              scaled to size 7.69112pt on input line 49.
+(Font)              scaled to size 7.69112pt on input line 53.
 LaTeX Font Info:    Font shape `FMX/futm/m/n' will be
-(Font)              scaled to size 6.07204pt on input line 49.
+(Font)              scaled to size 6.07204pt on input line 53.
 LaTeX Font Info:    Trying to load font information for FML+fncm on input line 
-49.
+53.
 
 (C:\Users\gabri\AppData\Local\Programs\MiKTeX\tex/latex/fouriernc\fmlfncm.fd
 File: fmlfncm.fd 2005/12/20 Fontinst v1.928 font definitions for FML/fncm.
 )
 LaTeX Font Info:    Font shape `U/futm/m/n' will be
-(Font)              scaled to size 10.11998pt on input line 49.
+(Font)              scaled to size 10.11998pt on input line 53.
 LaTeX Font Info:    Font shape `U/futm/m/n' will be
-(Font)              scaled to size 7.69112pt on input line 49.
+(Font)              scaled to size 7.69112pt on input line 53.
 LaTeX Font Info:    Font shape `U/futm/m/n' will be
-(Font)              scaled to size 6.07204pt on input line 49.
+(Font)              scaled to size 6.07204pt on input line 53.
 
-Underfull \hbox (badness 1383) in paragraph at lines 71--72
-\T1/fnc/m/n/11 a suc-cess-ful trans-mis-sion (pos-i-tive re-ward). The
- []
-
-<./imgs/QTable.png, id=50, 604.50844pt x 507.39563pt>
-File: ./imgs/QTable.png Graphic file (type png)
-<use ./imgs/QTable.png>
-Package pdftex.def Info: ./imgs/QTable.png  used on input line 92.
-(pdftex.def)             Requested size: 252.0pt x 211.51755pt.
 [1{C:/Users/gabri/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{C:/Users/ga
 bri/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/base/8r.enc}
 
 
 ]
-<./imgs/simulation_viewer.png, id=63, 471.26062pt x 289.83281pt>
+<./imgs/QTable.png, id=66, 604.50844pt x 507.39563pt>
+File: ./imgs/QTable.png Graphic file (type png)
+<use ./imgs/QTable.png>
+Package pdftex.def Info: ./imgs/QTable.png  used on input line 95.
+(pdftex.def)             Requested size: 252.0pt x 211.51755pt.
+<./imgs/simulation_viewer.png, id=67, 471.26062pt x 289.83281pt>
 File: ./imgs/simulation_viewer.png Graphic file (type png)
 <use ./imgs/simulation_viewer.png>
-Package pdftex.def Info: ./imgs/simulation_viewer.png  used on input line 103.
+Package pdftex.def Info: ./imgs/simulation_viewer.png  used on input line 106.
 (pdftex.def)             Requested size: 252.0pt x 154.98604pt.
 
-Underfull \hbox (badness 1430) in paragraph at lines 111--112
+Underfull \hbox (badness 1430) in paragraph at lines 114--115
 []\T1/fnc/m/n/11 The num-ber of pack-ets
  []
 
-<./imgs/Classic_3_nodes_0.01.png, id=64, 578.16pt x 578.16pt>
+<./imgs/Classic_3_nodes_0.01.png, id=69, 578.16pt x 578.16pt>
 File: ./imgs/Classic_3_nodes_0.01.png Graphic file (type png)
 <use ./imgs/Classic_3_nodes_0.01.png>
 Package pdftex.def Info: ./imgs/Classic_3_nodes_0.01.png  used on input line 12
-4.
+7.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/Classic_5_nodes_0.01.png, id=65, 578.16pt x 578.16pt>
+[2 <./imgs/QTable.png> <./imgs/simulation_viewer.png>]
+<./imgs/Classic_5_nodes_0.01.png, id=77, 578.16pt x 578.16pt>
 File: ./imgs/Classic_5_nodes_0.01.png Graphic file (type png)
 <use ./imgs/Classic_5_nodes_0.01.png>
 Package pdftex.def Info: ./imgs/Classic_5_nodes_0.01.png  used on input line 13
-2.
+5.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-[2 <./imgs/QTable.png> <./imgs/simulation_viewer.png> <./imgs/Classic_3_nodes_0
-.01.png>]
-<./imgs/Classic_10_nodes_0.01.png, id=73, 578.16pt x 578.16pt>
+<./imgs/Classic_10_nodes_0.01.png, id=78, 578.16pt x 578.16pt>
 File: ./imgs/Classic_10_nodes_0.01.png Graphic file (type png)
 <use ./imgs/Classic_10_nodes_0.01.png>
 Package pdftex.def Info: ./imgs/Classic_10_nodes_0.01.png  used on input line 1
-40.
+43.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/Classic_25_nodes_0.01.png, id=74, 578.16pt x 578.16pt>
+<./imgs/Classic_25_nodes_0.01.png, id=79, 578.16pt x 578.16pt>
 File: ./imgs/Classic_25_nodes_0.01.png Graphic file (type png)
 <use ./imgs/Classic_25_nodes_0.01.png>
 Package pdftex.def Info: ./imgs/Classic_25_nodes_0.01.png  used on input line 1
-48.
+51.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/Classic_5_nodes_0.001.png, id=75, 578.16pt x 578.16pt>
+ [3 <./imgs/Classic_3_nodes_0.01.png> <./imgs/Classic_5_nodes_0.01.png> <./imgs
+/Classic_10_nodes_0.01.png> <./imgs/Classic_25_nodes_0.01.png>]
+<./imgs/Classic_5_nodes_0.001.png, id=88, 578.16pt x 578.16pt>
 File: ./imgs/Classic_5_nodes_0.001.png Graphic file (type png)
 <use ./imgs/Classic_5_nodes_0.001.png>
 Package pdftex.def Info: ./imgs/Classic_5_nodes_0.001.png  used on input line 1
-59.
+62.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
- [3 <./imgs/Classic_5_nodes_0.01.png> <./imgs/Classic_10_nodes_0.01.png> <./img
-s/Classic_25_nodes_0.01.png>]
-<./imgs/Classic_5_nodes_0.005.png, id=83, 578.16pt x 578.16pt>
+<./imgs/Classic_5_nodes_0.005.png, id=89, 578.16pt x 578.16pt>
 File: ./imgs/Classic_5_nodes_0.005.png Graphic file (type png)
 <use ./imgs/Classic_5_nodes_0.005.png>
 Package pdftex.def Info: ./imgs/Classic_5_nodes_0.005.png  used on input line 1
-67.
+70.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
 File: ./imgs/Classic_5_nodes_0.01.png Graphic file (type png)
 <use ./imgs/Classic_5_nodes_0.01.png>
 Package pdftex.def Info: ./imgs/Classic_5_nodes_0.01.png  used on input line 17
-5.
+8.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/Classic_5_nodes_0.05.png, id=84, 578.16pt x 578.16pt>
+<./imgs/Classic_5_nodes_0.05.png, id=90, 578.16pt x 578.16pt>
 File: ./imgs/Classic_5_nodes_0.05.png Graphic file (type png)
 <use ./imgs/Classic_5_nodes_0.05.png>
 Package pdftex.def Info: ./imgs/Classic_5_nodes_0.05.png  used on input line 18
-3.
+6.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
  [4 <./imgs/Classic_5_nodes_0.001.png> <./imgs/Classic_5_nodes_0.005.png> <./im
 gs/Classic_5_nodes_0.05.png>]
-<./imgs/RL_3_nodes_ε_0.01_p_0.01.png, id=93, 578.16pt x 578.16pt>
+<./imgs/RL_3_nodes_ε_0.01_p_0.01.png, id=99, 578.16pt x 578.16pt>
 File: ./imgs/RL_3_nodes_ε_0.01_p_0.01.png Graphic file (type png)
 <use ./imgs/RL_3_nodes_ε_0.01_p_0.01.png>
 Package pdftex.def Info: ./imgs/RL_3_nodes_ε_0.01_p_0.01.png  used on input li
-ne 195.
+ne 198.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
 LaTeX Font Info:    Font shape `T1/fnc/m/n' will be
-(Font)              scaled to size 7.06795pt on input line 196.
+(Font)              scaled to size 7.06795pt on input line 199.
 LaTeX Font Info:    Font shape `FMX/futm/m/n' will be
-(Font)              scaled to size 8.27998pt on input line 196.
+(Font)              scaled to size 8.27998pt on input line 199.
 LaTeX Font Info:    Font shape `FMX/futm/m/n' will be
-(Font)              scaled to size 6.99199pt on input line 196.
+(Font)              scaled to size 6.99199pt on input line 199.
 LaTeX Font Info:    Font shape `FMX/futm/m/n' will be
-(Font)              scaled to size 5.51999pt on input line 196.
+(Font)              scaled to size 5.51999pt on input line 199.
 LaTeX Font Info:    Font shape `U/futm/m/n' will be
-(Font)              scaled to size 8.27998pt on input line 196.
+(Font)              scaled to size 8.27998pt on input line 199.
 LaTeX Font Info:    Font shape `U/futm/m/n' will be
-(Font)              scaled to size 6.99199pt on input line 196.
+(Font)              scaled to size 6.99199pt on input line 199.
 LaTeX Font Info:    Font shape `U/futm/m/n' will be
-(Font)              scaled to size 5.51999pt on input line 196.
-<./imgs/RL_5_nodes_ε_0.01_p_0.01.png, id=95, 578.16pt x 578.16pt>
+(Font)              scaled to size 5.51999pt on input line 199.
+<./imgs/RL_5_nodes_ε_0.01_p_0.01.png, id=101, 578.16pt x 578.16pt>
 File: ./imgs/RL_5_nodes_ε_0.01_p_0.01.png Graphic file (type png)
 <use ./imgs/RL_5_nodes_ε_0.01_p_0.01.png>
 Package pdftex.def Info: ./imgs/RL_5_nodes_ε_0.01_p_0.01.png  used on input li
-ne 203.
+ne 206.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/RL_10_nodes_ε_0.01_p_0.01.png, id=96, 578.16pt x 578.16pt>
+<./imgs/RL_10_nodes_ε_0.01_p_0.01.png, id=102, 578.16pt x 578.16pt>
 File: ./imgs/RL_10_nodes_ε_0.01_p_0.01.png Graphic file (type png)
 <use ./imgs/RL_10_nodes_ε_0.01_p_0.01.png>
 Package pdftex.def Info: ./imgs/RL_10_nodes_ε_0.01_p_0.01.png  used on input l
-ine 211.
+ine 214.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/RL_25_nodes_ε_0.01_p_0.01.png, id=97, 578.16pt x 578.16pt>
+<./imgs/RL_25_nodes_ε_0.01_p_0.01.png, id=103, 578.16pt x 578.16pt>
 File: ./imgs/RL_25_nodes_ε_0.01_p_0.01.png Graphic file (type png)
 <use ./imgs/RL_25_nodes_ε_0.01_p_0.01.png>
 Package pdftex.def Info: ./imgs/RL_25_nodes_ε_0.01_p_0.01.png  used on input l
-ine 219.
+ine 222.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
  [5 <./imgs/RL_3_nodes_ε_0.01_p_0.01.png> <./imgs/RL_5_nodes_ε_0.01_p_0.01.pn
 g> <./imgs/RL_10_nodes_ε_0.01_p_0.01.png>]
-<./imgs/RL_5_nodes_ε_0.01_p_0.001.png, id=108, 578.16pt x 578.16pt>
+<./imgs/RL_5_nodes_ε_0.01_p_0.001.png, id=114, 578.16pt x 578.16pt>
 File: ./imgs/RL_5_nodes_ε_0.01_p_0.001.png Graphic file (type png)
 <use ./imgs/RL_5_nodes_ε_0.01_p_0.001.png>
 Package pdftex.def Info: ./imgs/RL_5_nodes_ε_0.01_p_0.001.png  used on input l
-ine 230.
+ine 233.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/RL_5_nodes_ε_0.01_p_0.005.png, id=109, 578.16pt x 578.16pt>
+<./imgs/RL_5_nodes_ε_0.01_p_0.005.png, id=115, 578.16pt x 578.16pt>
 File: ./imgs/RL_5_nodes_ε_0.01_p_0.005.png Graphic file (type png)
 <use ./imgs/RL_5_nodes_ε_0.01_p_0.005.png>
 Package pdftex.def Info: ./imgs/RL_5_nodes_ε_0.01_p_0.005.png  used on input l
-ine 238.
+ine 241.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
 File: ./imgs/RL_5_nodes_ε_0.01_p_0.01.png Graphic file (type png)
 <use ./imgs/RL_5_nodes_ε_0.01_p_0.01.png>
 Package pdftex.def Info: ./imgs/RL_5_nodes_ε_0.01_p_0.01.png  used on input li
-ne 246.
+ne 249.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/RL_5_nodes_ε_0.01_p_0.05.png, id=110, 578.16pt x 578.16pt>
+<./imgs/RL_5_nodes_ε_0.01_p_0.05.png, id=116, 578.16pt x 578.16pt>
 File: ./imgs/RL_5_nodes_ε_0.01_p_0.05.png Graphic file (type png)
 <use ./imgs/RL_5_nodes_ε_0.01_p_0.05.png>
 Package pdftex.def Info: ./imgs/RL_5_nodes_ε_0.01_p_0.05.png  used on input li
-ne 254.
+ne 257.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
  [6 <./imgs/RL_25_nodes_ε_0.01_p_0.01.png> <./imgs/RL_5_nodes_ε_0.01_p_0.001.
 png> <./imgs/RL_5_nodes_ε_0.01_p_0.005.png>]
 File: ./imgs/RL_5_nodes_ε_0.01_p_0.01.png Graphic file (type png)
 <use ./imgs/RL_5_nodes_ε_0.01_p_0.01.png>
 Package pdftex.def Info: ./imgs/RL_5_nodes_ε_0.01_p_0.01.png  used on input li
-ne 264.
+ne 267.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/RL_5_nodes_ε_0.1_p_0.01.png, id=122, 578.16pt x 578.16pt>
+<./imgs/RL_5_nodes_ε_0.1_p_0.01.png, id=128, 578.16pt x 578.16pt>
 File: ./imgs/RL_5_nodes_ε_0.1_p_0.01.png Graphic file (type png)
 <use ./imgs/RL_5_nodes_ε_0.1_p_0.01.png>
 Package pdftex.def Info: ./imgs/RL_5_nodes_ε_0.1_p_0.01.png  used on input lin
-e 272.
+e 275.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/RL_5_nodes_ε_0.5_p_0.01.png, id=123, 578.16pt x 578.16pt>
+<./imgs/RL_5_nodes_ε_0.5_p_0.01.png, id=129, 578.16pt x 578.16pt>
 File: ./imgs/RL_5_nodes_ε_0.5_p_0.01.png Graphic file (type png)
 <use ./imgs/RL_5_nodes_ε_0.5_p_0.01.png>
 Package pdftex.def Info: ./imgs/RL_5_nodes_ε_0.5_p_0.01.png  used on input lin
-e 280.
+e 283.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
 
 [7 <./imgs/RL_5_nodes_ε_0.01_p_0.05.png> <./imgs/RL_5_nodes_ε_0.1_p_0.01.png>
 ]
-Underfull \hbox (badness 1430) in paragraph at lines 289--290
+Underfull \hbox (badness 1430) in paragraph at lines 292--293
 []\T1/fnc/m/n/11 The num-ber of pack-ets
  []
 
-<./imgs/Comparison_5_nodes_ε_0.01_p_0.001.png, id=134, 578.16pt x 578.16pt>
+<./imgs/Comparison_5_nodes_ε_0.01_p_0.001.png, id=140, 578.16pt x 578.16pt>
 File: ./imgs/Comparison_5_nodes_ε_0.01_p_0.001.png Graphic file (type png)
 <use ./imgs/Comparison_5_nodes_ε_0.01_p_0.001.png>
 Package pdftex.def Info: ./imgs/Comparison_5_nodes_ε_0.01_p_0.001.png  used on
- input line 297.
+ input line 300.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/Comparison_5_nodes_ε_0.01_p_0.01.png, id=135, 578.16pt x 578.16pt>
+<./imgs/Comparison_5_nodes_ε_0.01_p_0.01.png, id=141, 578.16pt x 578.16pt>
 File: ./imgs/Comparison_5_nodes_ε_0.01_p_0.01.png Graphic file (type png)
 <use ./imgs/Comparison_5_nodes_ε_0.01_p_0.01.png>
 Package pdftex.def Info: ./imgs/Comparison_5_nodes_ε_0.01_p_0.01.png  used on 
-input line 305.
+input line 308.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/Comparison_10_nodes_ε_0.01_p_0.001.png, id=136, 578.16pt x 578.16pt>
+<./imgs/Comparison_10_nodes_ε_0.01_p_0.001.png, id=142, 578.16pt x 578.16pt>
 File: ./imgs/Comparison_10_nodes_ε_0.01_p_0.001.png Graphic file (type png)
 <use ./imgs/Comparison_10_nodes_ε_0.01_p_0.001.png>
 Package pdftex.def Info: ./imgs/Comparison_10_nodes_ε_0.01_p_0.001.png  used o
-n input line 314.
+n input line 317.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
 [8 <./imgs/RL_5_nodes_ε_0.5_p_0.01.png> <./imgs/Comparison_5_nodes_ε_0.01_p_0
 .001.png> <./imgs/Comparison_5_nodes_ε_0.01_p_0.01.png>]
-<./imgs/Comparison_10_nodes_ε_0.01_p_0.01.png, id=147, 578.16pt x 578.16pt>
+<./imgs/Comparison_10_nodes_ε_0.01_p_0.01.png, id=153, 578.16pt x 578.16pt>
 File: ./imgs/Comparison_10_nodes_ε_0.01_p_0.01.png Graphic file (type png)
 <use ./imgs/Comparison_10_nodes_ε_0.01_p_0.01.png>
 Package pdftex.def Info: ./imgs/Comparison_10_nodes_ε_0.01_p_0.01.png  used on
- input line 322.
+ input line 325.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/Comparison_25_nodes_ε_0.01_p_0.001.png, id=148, 578.16pt x 578.16pt>
+<./imgs/Comparison_25_nodes_ε_0.01_p_0.001.png, id=154, 578.16pt x 578.16pt>
 File: ./imgs/Comparison_25_nodes_ε_0.01_p_0.001.png Graphic file (type png)
 <use ./imgs/Comparison_25_nodes_ε_0.01_p_0.001.png>
 Package pdftex.def Info: ./imgs/Comparison_25_nodes_ε_0.01_p_0.001.png  used o
-n input line 331.
+n input line 334.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/Comparison_25_nodes_ε_0.01_p_0.01.png, id=149, 578.16pt x 578.16pt>
+<./imgs/Comparison_25_nodes_ε_0.01_p_0.01.png, id=155, 578.16pt x 578.16pt>
 File: ./imgs/Comparison_25_nodes_ε_0.01_p_0.01.png Graphic file (type png)
 <use ./imgs/Comparison_25_nodes_ε_0.01_p_0.01.png>
 Package pdftex.def Info: ./imgs/Comparison_25_nodes_ε_0.01_p_0.01.png  used on
- input line 339.
+ input line 342.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
-<./imgs/Comparison_50_nodes_ε_0.01_p_0.001.png, id=150, 578.16pt x 578.16pt>
+<./imgs/Comparison_50_nodes_ε_0.01_p_0.001.png, id=156, 578.16pt x 578.16pt>
 File: ./imgs/Comparison_50_nodes_ε_0.01_p_0.001.png Graphic file (type png)
 <use ./imgs/Comparison_50_nodes_ε_0.01_p_0.001.png>
 Package pdftex.def Info: ./imgs/Comparison_50_nodes_ε_0.01_p_0.001.png  used o
-n input line 348.
+n input line 351.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
  [9 <./imgs/Comparison_10_nodes_ε_0.01_p_0.001.png> <./imgs/Comparison_10_node
 s_ε_0.01_p_0.01.png> <./imgs/Comparison_25_nodes_ε_0.01_p_0.001.png> <./imgs/
 Comparison_25_nodes_ε_0.01_p_0.01.png>]
-<./imgs/Comparison_50_nodes_ε_0.01_p_0.01.png, id=163, 578.16pt x 578.16pt>
+<./imgs/Comparison_50_nodes_ε_0.01_p_0.01.png, id=169, 578.16pt x 578.16pt>
 File: ./imgs/Comparison_50_nodes_ε_0.01_p_0.01.png Graphic file (type png)
 <use ./imgs/Comparison_50_nodes_ε_0.01_p_0.01.png>
 Package pdftex.def Info: ./imgs/Comparison_50_nodes_ε_0.01_p_0.01.png  used on
- input line 356.
+ input line 359.
 (pdftex.def)             Requested size: 252.0pt x 252.00041pt.
 
 No file main.bbl.
+
+Underfull \hbox (badness 10000) in paragraph at lines 371--372
+[]\T1/fnc/m/n/9 https://github.com/slashm4n/CSMA-CA/blob/main/CSMA-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 373--374
+[]\T1/fnc/m/n/9 https://github.com/slashm4n/CSMA-CA/blob/main/CSMA-
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 375--376
+[]\T1/fnc/m/n/9 https://github.com/slashm4n/CSMA-
+ []
+
 [10 <./imgs/Comparison_50_nodes_ε_0.01_p_0.001.png> <./imgs/Comparison_50_node
 s_ε_0.01_p_0.01.png>] (main.aux)
  ***********
@@ -1393,16 +1403,16 @@ L3 programming layer <2024-05-08>
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 95AD21E3D8BE4C722C692FDB535937A3;1428.
+(rerunfilecheck)             Checksum: 3A683FCC97E0313477EC4E060C3B181A;1342.
  ) 
 Here is how much of TeX's memory you used:
- 23638 strings out of 474312
- 449564 string characters out of 5739286
- 1945907 words of memory out of 5000000
+ 23639 strings out of 474312
+ 449546 string characters out of 5739286
+ 1946907 words of memory out of 5000000
  45600 multiletter control sequences out of 15000+600000
  671893 words of font info for 175 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 84i,7n,93p,581b,448s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 84i,7n,93p,811b,493s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/Users/gabri/AppData/Local/Programs/MiKTeX/fonts/type1/public/fourier/four
 ier-mex.pfb><C:/Users/gabri/AppData/Local/Programs/MiKTeX/fonts/type1/public/fo
 urier/fourier-mlit.pfb><C:/Users/gabri/AppData/Local/Programs/MiKTeX/fonts/type
@@ -1411,9 +1421,9 @@ onts/type1/urw/ncntrsbk/uncb8a.pfb><C:/Users/gabri/AppData/Local/Programs/MiKTe
 X/fonts/type1/urw/ncntrsbk/uncbi8a.pfb><C:/Users/gabri/AppData/Local/Programs/M
 iKTeX/fonts/type1/urw/ncntrsbk/uncr8a.pfb><C:/Users/gabri/AppData/Local/Program
 s/MiKTeX/fonts/type1/urw/ncntrsbk/uncri8a.pfb>
-Output written on main.pdf (10 pages, 1747816 bytes).
+Output written on main.pdf (10 pages, 1750297 bytes).
 PDF statistics:
- 220 PDF objects out of 1000 (max. 8388607)
- 53 named destinations out of 1000 (max. 500000)
+ 223 PDF objects out of 1000 (max. 8388607)
+ 54 named destinations out of 1000 (max. 500000)
  231 words of extra memory for PDF output out of 10000 (max. 10000000)
 
